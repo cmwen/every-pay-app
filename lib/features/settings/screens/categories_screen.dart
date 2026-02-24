@@ -11,11 +11,7 @@ class CategoriesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final categoriesAsync = ref.watch(
-      StreamProvider<List<Category>>(
-        (ref) => ref.watch(categoryRepositoryProvider).watchCategories(),
-      ),
-    );
+    final categoriesAsync = ref.watch(categoriesProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Categories')),

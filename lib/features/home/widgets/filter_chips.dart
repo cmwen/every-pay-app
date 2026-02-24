@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:everypay/domain/entities/category.dart';
 import 'package:everypay/core/constants/category_defaults.dart';
 import 'package:everypay/features/home/providers/expense_list_provider.dart';
 import 'package:everypay/shared/providers/repository_providers.dart';
@@ -10,11 +9,7 @@ class FilterChips extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final categories = ref.watch(
-      StreamProvider<List<Category>>(
-        (ref) => ref.watch(categoryRepositoryProvider).watchCategories(),
-      ),
-    );
+    final categories = ref.watch(categoriesProvider);
     final filter = ref.watch(expenseFilterProvider);
 
     return SizedBox(

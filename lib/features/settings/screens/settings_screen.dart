@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:everypay/domain/entities/category.dart';
 import 'package:everypay/shared/providers/repository_providers.dart';
 import 'package:everypay/shared/providers/theme_provider.dart';
 
@@ -12,11 +11,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
 
-    final categoriesAsync = ref.watch(
-      StreamProvider<List<Category>>(
-        (ref) => ref.watch(categoryRepositoryProvider).watchCategories(),
-      ),
-    );
+    final categoriesAsync = ref.watch(categoriesProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),

@@ -35,6 +35,7 @@ class EditExpenseScreen extends ConsumerWidget {
           body: ExpenseForm(
             initialExpense: expense,
             onSave: (formData) async {
+              final startDate = formData.startDate ?? expense.startDate;
               final updated = expense.copyWith(
                 name: formData.name,
                 provider: formData.provider,
@@ -46,7 +47,7 @@ class EditExpenseScreen extends ConsumerWidget {
                 startDate: formData.startDate,
                 endDate: formData.endDate,
                 nextDueDate: BillingCalculator.calculateNextDueDate(
-                  formData.startDate,
+                  startDate,
                   formData.billingCycle,
                   customDays: formData.customDays,
                 ),

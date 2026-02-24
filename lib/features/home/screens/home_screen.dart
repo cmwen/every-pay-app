@@ -16,11 +16,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final expensesAsync = ref.watch(expenseListProvider);
-    final categoriesAsync = ref.watch(
-      StreamProvider<List<Category>>(
-        (ref) => ref.watch(categoryRepositoryProvider).watchCategories(),
-      ),
-    );
+    final categoriesAsync = ref.watch(categoriesProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Every-Pay')),

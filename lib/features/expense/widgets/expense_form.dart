@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:everypay/core/constants/app_constants.dart';
 import 'package:everypay/core/constants/category_defaults.dart';
-import 'package:everypay/domain/entities/category.dart';
 import 'package:everypay/domain/entities/expense.dart';
 import 'package:everypay/domain/enums/billing_cycle.dart';
 import 'package:everypay/shared/providers/repository_providers.dart';
@@ -15,7 +14,7 @@ class ExpenseFormData {
   final String currency;
   final BillingCycle billingCycle;
   final int? customDays;
-  final DateTime startDate;
+  final DateTime? startDate;
   final DateTime? endDate;
   final String? notes;
   final List<String> tags;
@@ -28,7 +27,7 @@ class ExpenseFormData {
     required this.currency,
     required this.billingCycle,
     this.customDays,
-    required this.startDate,
+    this.startDate,
     this.endDate,
     this.notes,
     this.tags = const [],
@@ -63,7 +62,7 @@ class _ExpenseFormState extends ConsumerState<ExpenseForm> {
   late String _currency;
   late BillingCycle _billingCycle;
   int? _customDays;
-  late DateTime _startDate;
+  DateTime? _startDate;
   DateTime? _endDate;
   late List<String> _tags;
   bool _saving = false;
@@ -84,7 +83,7 @@ class _ExpenseFormState extends ConsumerState<ExpenseForm> {
     _currency = e?.currency ?? AppConstants.defaultCurrency;
     _billingCycle = e?.billingCycle ?? BillingCycle.monthly;
     _customDays = e?.customDays;
-    _startDate = e?.startDate ?? DateTime.now();
+    _startDate = e?.startDate;
     _endDate = e?.endDate;
     _tags = e?.tags.toList() ?? [];
   }
@@ -101,11 +100,7 @@ class _ExpenseFormState extends ConsumerState<ExpenseForm> {
 
   @override
   Widget build(BuildContext context) {
-    final categoriesAsync = ref.watch(
-      StreamProvider<List<Category>>(
-        (ref) => ref.watch(categoryRepositoryProvider).watchCategories(),
-      ),
-    );
+    final categoriesAsync = ref.watch(categoriesProvider);
 
     return Form(
       key: _formKey,
@@ -279,9 +274,11 @@ class _ExpenseFormState extends ConsumerState<ExpenseForm> {
             children: [
               Expanded(
                 child: _DateField(
-                  label: 'Start Date *',
+                  label: 'Start Date',
                   value: _startDate,
                   onChanged: (d) => setState(() => _startDate = d),
+                  allowClear: true,
+                  onClear: () => setState(() => _startDate = null),
                 ),
               ),
               const SizedBox(width: 12),
@@ -291,6 +288,7 @@ class _ExpenseFormState extends ConsumerState<ExpenseForm> {
                   value: _endDate,
                   onChanged: (d) => setState(() => _endDate = d),
                   allowClear: true,
+                  onClear: () => setState(() => _endDate = null),
                 ),
               ),
             ],
@@ -395,12 +393,14 @@ class _DateField extends StatelessWidget {
   final DateTime? value;
   final ValueChanged<DateTime> onChanged;
   final bool allowClear;
+  final VoidCallback? onClear;
 
   const _DateField({
     required this.label,
     required this.value,
     required this.onChanged,
     this.allowClear = false,
+    this.onClear,
   });
 
   @override
@@ -416,7 +416,15 @@ class _DateField extends StatelessWidget {
         if (picked != null) onChanged(picked);
       },
       child: InputDecorator(
-        decoration: InputDecoration(labelText: label),
+        decoration: InputDecoration(
+          labelText: label,
+          suffixIcon: allowClear && value != null
+              ? IconButton(
+                  icon: const Icon(Icons.clear, size: 18),
+                  onPressed: onClear,
+                )
+              : null,
+        ),
         child: Text(
           value != null
               ? '${value!.year}-${value!.month.toString().padLeft(2, '0')}-${value!.day.toString().padLeft(2, '0')}'

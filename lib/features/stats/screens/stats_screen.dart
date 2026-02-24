@@ -76,16 +76,8 @@ class _MonthlyTabState extends ConsumerState<_MonthlyTab> {
 
   @override
   Widget build(BuildContext context) {
-    final expensesAsync = ref.watch(
-      StreamProvider<List<Expense>>(
-        (ref) => ref.watch(expenseRepositoryProvider).watchExpenses(),
-      ),
-    );
-    final categoriesAsync = ref.watch(
-      StreamProvider<List<Category>>(
-        (ref) => ref.watch(categoryRepositoryProvider).watchCategories(),
-      ),
-    );
+    final expensesAsync = ref.watch(allExpensesProvider);
+    final categoriesAsync = ref.watch(categoriesProvider);
 
     return expensesAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -219,11 +211,7 @@ class _YearlyTabState extends ConsumerState<_YearlyTab> {
 
   @override
   Widget build(BuildContext context) {
-    final expensesAsync = ref.watch(
-      StreamProvider<List<Expense>>(
-        (ref) => ref.watch(expenseRepositoryProvider).watchExpenses(),
-      ),
-    );
+    final expensesAsync = ref.watch(allExpensesProvider);
 
     return expensesAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -331,11 +319,7 @@ class _UpcomingTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final expensesAsync = ref.watch(
-      StreamProvider<List<Expense>>(
-        (ref) => ref.watch(expenseRepositoryProvider).watchExpenses(),
-      ),
-    );
+    final expensesAsync = ref.watch(allExpensesProvider);
 
     return expensesAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
