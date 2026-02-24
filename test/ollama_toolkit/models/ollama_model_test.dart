@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:min_flutter_template/ollama_toolkit/models/ollama_model.dart';
+import 'package:everypay/ollama_toolkit/models/ollama_model.dart';
 
 void main() {
   group('ModelCapabilities', () {

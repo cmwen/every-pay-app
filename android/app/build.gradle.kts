@@ -34,8 +34,8 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    // TODO: Change namespace to match your package name (e.g., "com.yourcompany.yourapp")
-    namespace = "com.cmwen.min_flutter_template"
+    // Namespace updated to match org.cmwen.everypay
+    namespace = "org.cmwen.everypay"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -49,9 +49,9 @@ android {
     }
 
     defaultConfig {
-        // TODO: Change applicationId to match your package name (e.g., "com.yourcompany.yourapp")
+        // Application ID updated to org.cmwen.everypay
         // IMPORTANT: This MUST match the package in MainActivity.kt and namespace above
-        applicationId = "com.cmwen.min_flutter_template"
+        applicationId = "org.cmwen.everypay"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

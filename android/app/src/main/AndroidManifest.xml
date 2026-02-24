@@ -27,9 +27,9 @@
     <!-- Audio - For voice recording, audio capture -->
     <!-- <uses-permission android:name="android.permission.RECORD_AUDIO"/> -->
 
-    <!-- TODO: Change android:label to your app's display name -->
+    <!-- Application label updated to Every-Pay -->
     <application
-        android:label="min_flutter_template"
+        android:label="Every-Pay"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:networkSecurityConfig="@xml/network_security_config">

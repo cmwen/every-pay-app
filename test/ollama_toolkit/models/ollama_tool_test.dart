@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:min_flutter_template/ollama_toolkit/models/ollama_tool.dart';
+import 'package:everypay/ollama_toolkit/models/ollama_tool.dart';
 
 void main() {
   group('ToolDefinition', () {
