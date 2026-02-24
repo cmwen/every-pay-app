@@ -5,10 +5,27 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:everypay/app.dart';
+import 'package:everypay/data/repositories/expense_repository_impl.dart';
+import 'package:everypay/data/repositories/category_repository_impl.dart';
+import 'package:everypay/domain/repositories/expense_repository.dart';
+import 'package:everypay/domain/repositories/category_repository.dart';
+import 'package:everypay/shared/providers/repository_providers.dart';
 
 void main() {
   testWidgets('App renders and shows home screen', (WidgetTester tester) async {
-    await tester.pumpWidget(const ProviderScope(child: EveryPayApp()));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          expenseRepositoryProvider.overrideWithValue(
+            InMemoryExpenseRepository(),
+          ),
+          categoryRepositoryProvider.overrideWithValue(
+            InMemoryCategoryRepository(),
+          ),
+        ],
+        child: const EveryPayApp(),
+      ),
+    );
     // Use pump() instead of pumpAndSettle() since streams keep emitting
     await tester.pump();
     await tester.pump();

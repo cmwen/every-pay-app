@@ -4,6 +4,9 @@ import 'package:everypay/features/home/screens/home_screen.dart';
 import 'package:everypay/features/stats/screens/stats_screen.dart';
 import 'package:everypay/features/settings/screens/settings_screen.dart';
 import 'package:everypay/features/settings/screens/categories_screen.dart';
+import 'package:everypay/features/settings/screens/export_screen.dart';
+import 'package:everypay/features/settings/screens/security_screen.dart';
+import 'package:everypay/features/sync/screens/devices_screen.dart';
 import 'package:everypay/features/expense/screens/add_expense_screen.dart';
 import 'package:everypay/features/expense/screens/expense_detail_screen.dart';
 import 'package:everypay/features/expense/screens/edit_expense_screen.dart';
@@ -84,6 +87,21 @@ final router = GoRouter(
                   path: 'categories',
                   parentNavigatorKey: _rootNavigatorKey,
                   builder: (context, state) => const CategoriesScreen(),
+                ),
+                GoRoute(
+                  path: 'export',
+                  parentNavigatorKey: _rootNavigatorKey,
+                  builder: (context, state) => const ExportScreen(),
+                ),
+                GoRoute(
+                  path: 'security',
+                  parentNavigatorKey: _rootNavigatorKey,
+                  builder: (context, state) => const SecurityScreen(),
+                ),
+                GoRoute(
+                  path: 'devices',
+                  parentNavigatorKey: _rootNavigatorKey,
+                  builder: (context, state) => const DevicesScreen(),
                 ),
               ],
             ),

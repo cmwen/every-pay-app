@@ -59,6 +59,36 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () => context.go('/settings/categories'),
           ),
 
+          // Data section
+          _SectionHeader(title: 'DATA'),
+          ListTile(
+            leading: const Icon(Icons.import_export),
+            title: const Text('Export & Import'),
+            subtitle: const Text('Backup or restore your data'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.go('/settings/export'),
+          ),
+
+          // Security section
+          _SectionHeader(title: 'SECURITY'),
+          ListTile(
+            leading: const Icon(Icons.security),
+            title: const Text('Security'),
+            subtitle: const Text('App lock & encryption'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.go('/settings/security'),
+          ),
+
+          // Sync section
+          _SectionHeader(title: 'SYNC'),
+          ListTile(
+            leading: const Icon(Icons.devices),
+            title: const Text('Paired Devices'),
+            subtitle: const Text('P2P sync with nearby devices'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.go('/settings/devices'),
+          ),
+
           // About section
           _SectionHeader(title: 'ABOUT'),
           ListTile(
