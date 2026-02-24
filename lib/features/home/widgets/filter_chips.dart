@@ -62,7 +62,7 @@ class FilterChips extends ConsumerWidget {
               );
             }),
             loading: () => [],
-            error: (_, __) => [],
+            error: (_, _) => [],
           ),
         ],
       ),

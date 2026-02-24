@@ -54,7 +54,7 @@ class SettingsScreen extends ConsumerWidget {
             trailing: categoriesAsync.when(
               data: (cats) => Text('${cats.length}'),
               loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
+              error: (_, _) => const SizedBox.shrink(),
             ),
             onTap: () => context.go('/settings/categories'),
           ),

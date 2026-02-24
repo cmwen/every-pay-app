@@ -66,7 +66,7 @@ class HomeScreen extends ConsumerWidget {
               Expanded(
                 child: ListView.separated(
                   itemCount: expenses.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  separatorBuilder: (_, _) => const Divider(height: 1),
                   itemBuilder: (context, index) {
                     final expense = expenses[index];
                     final category = categoryMap[expense.categoryId];
