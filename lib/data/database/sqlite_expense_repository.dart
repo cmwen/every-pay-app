@@ -10,70 +10,75 @@ class SqliteExpenseRepository implements ExpenseRepository {
   final _changeController = StreamController<void>.broadcast();
 
   Map<String, dynamic> _toMap(Expense e) => {
-        'id': e.id,
-        'name': e.name,
-        'provider': e.provider,
-        'category_id': e.categoryId,
-        'amount': e.amount,
-        'currency': e.currency,
-        'billing_cycle': e.billingCycle.name,
-        'custom_days': e.customDays,
-        'start_date': e.startDate.toIso8601String(),
-        'end_date': e.endDate?.toIso8601String(),
-        'next_due_date': e.nextDueDate?.toIso8601String(),
-        'status': e.status.name,
-        'notes': e.notes,
-        'logo_asset': e.logoAsset,
-        'tags': e.tags.join(','),
-        'created_at': e.createdAt.toIso8601String(),
-        'updated_at': e.updatedAt.toIso8601String(),
-        'device_id': e.deviceId,
-        'is_deleted': 0,
-      };
+    'id': e.id,
+    'name': e.name,
+    'provider': e.provider,
+    'category_id': e.categoryId,
+    'amount': e.amount,
+    'currency': e.currency,
+    'billing_cycle': e.billingCycle.name,
+    'custom_days': e.customDays,
+    'start_date': e.startDate.toIso8601String(),
+    'end_date': e.endDate?.toIso8601String(),
+    'next_due_date': e.nextDueDate?.toIso8601String(),
+    'status': e.status.name,
+    'notes': e.notes,
+    'logo_asset': e.logoAsset,
+    'tags': e.tags.join(','),
+    'created_at': e.createdAt.toIso8601String(),
+    'updated_at': e.updatedAt.toIso8601String(),
+    'device_id': e.deviceId,
+    'payment_method_id': e.paymentMethodId,
+    'is_deleted': 0,
+  };
 
   Expense _fromMap(Map<String, dynamic> m) => Expense(
-        id: m['id'] as String,
-        name: m['name'] as String,
-        provider: m['provider'] as String?,
-        categoryId: m['category_id'] as String,
-        amount: (m['amount'] as num).toDouble(),
-        currency: m['currency'] as String,
-        billingCycle: BillingCycle.values.byName(m['billing_cycle'] as String),
-        customDays: m['custom_days'] as int?,
-        startDate: DateTime.parse(m['start_date'] as String),
-        endDate: m['end_date'] != null
-            ? DateTime.parse(m['end_date'] as String)
-            : null,
-        nextDueDate: m['next_due_date'] != null
-            ? DateTime.parse(m['next_due_date'] as String)
-            : null,
-        status: ExpenseStatus.values.byName(m['status'] as String),
-        notes: m['notes'] as String?,
-        logoAsset: m['logo_asset'] as String?,
-        tags: (m['tags'] as String?)?.isNotEmpty == true
-            ? (m['tags'] as String).split(',')
-            : const [],
-        createdAt: DateTime.parse(m['created_at'] as String),
-        updatedAt: DateTime.parse(m['updated_at'] as String),
-        deviceId: m['device_id'] as String,
-      );
+    id: m['id'] as String,
+    name: m['name'] as String,
+    provider: m['provider'] as String?,
+    categoryId: m['category_id'] as String,
+    amount: (m['amount'] as num).toDouble(),
+    currency: m['currency'] as String,
+    billingCycle: BillingCycle.values.byName(m['billing_cycle'] as String),
+    customDays: m['custom_days'] as int?,
+    startDate: DateTime.parse(m['start_date'] as String),
+    endDate: m['end_date'] != null
+        ? DateTime.parse(m['end_date'] as String)
+        : null,
+    nextDueDate: m['next_due_date'] != null
+        ? DateTime.parse(m['next_due_date'] as String)
+        : null,
+    status: ExpenseStatus.values.byName(m['status'] as String),
+    notes: m['notes'] as String?,
+    logoAsset: m['logo_asset'] as String?,
+    tags: (m['tags'] as String?)?.isNotEmpty == true
+        ? (m['tags'] as String).split(',')
+        : const [],
+    createdAt: DateTime.parse(m['created_at'] as String),
+    updatedAt: DateTime.parse(m['updated_at'] as String),
+    deviceId: m['device_id'] as String,
+    paymentMethodId: m['payment_method_id'] as String?,
+  );
 
   @override
   Stream<List<Expense>> watchExpenses({
     String? categoryId,
     String? status,
     String? searchQuery,
+    String? paymentMethodId,
   }) async* {
     yield await _queryExpenses(
       categoryId: categoryId,
       status: status,
       searchQuery: searchQuery,
+      paymentMethodId: paymentMethodId,
     );
     await for (final _ in _changeController.stream) {
       yield await _queryExpenses(
         categoryId: categoryId,
         status: status,
         searchQuery: searchQuery,
+        paymentMethodId: paymentMethodId,
       );
     }
   }
@@ -82,6 +87,7 @@ class SqliteExpenseRepository implements ExpenseRepository {
     String? categoryId,
     String? status,
     String? searchQuery,
+    String? paymentMethodId,
   }) async {
     final db = await DatabaseHelper.database;
     final where = <String>['is_deleted = 0'];
@@ -94,6 +100,10 @@ class SqliteExpenseRepository implements ExpenseRepository {
     if (status != null && status != 'all') {
       where.add('status = ?');
       args.add(status);
+    }
+    if (paymentMethodId != null) {
+      where.add('payment_method_id = ?');
+      args.add(paymentMethodId);
     }
 
     final results = await db.query(
@@ -144,10 +154,7 @@ class SqliteExpenseRepository implements ExpenseRepository {
     final db = await DatabaseHelper.database;
     await db.update(
       'expenses',
-      {
-        'is_deleted': 1,
-        'updated_at': DateTime.now().toIso8601String(),
-      },
+      {'is_deleted': 1, 'updated_at': DateTime.now().toIso8601String()},
       where: 'id = ?',
       whereArgs: [id],
     );

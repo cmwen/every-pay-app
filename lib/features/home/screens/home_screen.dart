@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:everypay/domain/entities/category.dart';
+import 'package:everypay/domain/entities/payment_method.dart';
 import 'package:everypay/features/home/providers/expense_list_provider.dart';
 import 'package:everypay/features/home/providers/home_summary.dart';
+import 'package:everypay/features/home/widgets/due_soon_section.dart';
 import 'package:everypay/features/home/widgets/summary_card.dart';
 import 'package:everypay/features/home/widgets/expense_list_item.dart';
 import 'package:everypay/features/home/widgets/filter_chips.dart';
@@ -27,6 +29,14 @@ class HomeScreen extends ConsumerWidget {
             _ => <Category>[],
           };
           final categoryMap = {for (final c in categories) c.id: c};
+
+          final methodsAsync = ref.watch(allPaymentMethodsProvider);
+          final methods = switch (methodsAsync) {
+            AsyncData(:final value) => value,
+            _ => <PaymentMethod>[],
+          };
+          final methodMap = {for (final m in methods) m.id: m};
+
           final summary = HomeSummary.compute(expenses);
 
           if (expenses.isEmpty) {
@@ -36,6 +46,7 @@ class HomeScreen extends ConsumerWidget {
                   padding: const EdgeInsets.all(16),
                   child: SummaryCard(summary: summary),
                 ),
+                const DueSoonSection(),
                 const Expanded(
                   child: EmptyStateView(
                     icon: Icons.celebration,
@@ -57,6 +68,7 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 child: SummaryCard(summary: summary),
               ),
+              const DueSoonSection(),
               const FilterChips(),
               const SizedBox(height: 4),
               Expanded(
@@ -66,9 +78,13 @@ class HomeScreen extends ConsumerWidget {
                   itemBuilder: (context, index) {
                     final expense = expenses[index];
                     final category = categoryMap[expense.categoryId];
+                    final paymentMethod = expense.paymentMethodId != null
+                        ? methodMap[expense.paymentMethodId]
+                        : null;
                     return ExpenseListItem(
                       expense: expense,
                       category: category,
+                      paymentMethod: paymentMethod,
                       onTap: () => context.go('/expense/${expense.id}'),
                     );
                   },

@@ -27,24 +27,22 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
       final json = await service.exportJson();
       final dir = await getApplicationDocumentsDirectory();
       final file = File(
-          '${dir.path}/everypay_export_${DateTime.now().millisecondsSinceEpoch}.json');
+        '${dir.path}/everypay_export_${DateTime.now().millisecondsSinceEpoch}.json',
+      );
       await file.writeAsString(json);
       await SharePlus.instance.share(
-        ShareParams(
-          files: [XFile(file.path)],
-          subject: 'Every-Pay Export',
-        ),
+        ShareParams(files: [XFile(file.path)], subject: 'Every-Pay Export'),
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Exported successfully')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Exported successfully')));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export failed: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Export failed: $e')));
       }
     } finally {
       if (mounted) setState(() => _isExporting = false);
@@ -61,7 +59,8 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
       final csv = await service.exportCsv();
       final dir = await getApplicationDocumentsDirectory();
       final file = File(
-          '${dir.path}/everypay_export_${DateTime.now().millisecondsSinceEpoch}.csv');
+        '${dir.path}/everypay_export_${DateTime.now().millisecondsSinceEpoch}.csv',
+      );
       await file.writeAsString(csv);
       await SharePlus.instance.share(
         ShareParams(
@@ -76,9 +75,9 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('CSV export failed: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('CSV export failed: $e')));
       }
     } finally {
       if (mounted) setState(() => _isExporting = false);

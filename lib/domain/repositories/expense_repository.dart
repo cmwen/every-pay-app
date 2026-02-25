@@ -5,6 +5,7 @@ abstract class ExpenseRepository {
     String? categoryId,
     String? status,
     String? searchQuery,
+    String? paymentMethodId,
   });
   Future<Expense?> getExpenseById(String id);
   Future<void> upsertExpense(Expense expense);

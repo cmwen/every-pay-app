@@ -6,11 +6,14 @@ import 'package:everypay/features/settings/screens/settings_screen.dart';
 import 'package:everypay/features/settings/screens/categories_screen.dart';
 import 'package:everypay/features/settings/screens/export_screen.dart';
 import 'package:everypay/features/settings/screens/security_screen.dart';
+import 'package:everypay/features/settings/screens/payment_methods_screen.dart';
+import 'package:everypay/features/settings/screens/payment_method_form_screen.dart';
 import 'package:everypay/features/sync/screens/devices_screen.dart';
 import 'package:everypay/features/expense/screens/add_expense_screen.dart';
 import 'package:everypay/features/expense/screens/expense_detail_screen.dart';
 import 'package:everypay/features/expense/screens/edit_expense_screen.dart';
 import 'package:everypay/features/expense/screens/service_library_screen.dart';
+import 'package:everypay/features/upcoming/screens/upcoming_payments_screen.dart';
 import 'package:everypay/shared/widgets/app_scaffold.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -35,6 +38,11 @@ final router = GoRouter(
               path: '/',
               builder: (context, state) => const HomeScreen(),
               routes: [
+                GoRoute(
+                  path: 'upcoming',
+                  parentNavigatorKey: _rootNavigatorKey,
+                  builder: (context, state) => const UpcomingPaymentsScreen(),
+                ),
                 GoRoute(
                   path: 'expense/add',
                   parentNavigatorKey: _rootNavigatorKey,
@@ -87,6 +95,26 @@ final router = GoRouter(
                   path: 'categories',
                   parentNavigatorKey: _rootNavigatorKey,
                   builder: (context, state) => const CategoriesScreen(),
+                ),
+                GoRoute(
+                  path: 'payment-methods',
+                  parentNavigatorKey: _rootNavigatorKey,
+                  builder: (context, state) => const PaymentMethodsScreen(),
+                  routes: [
+                    GoRoute(
+                      path: 'add',
+                      parentNavigatorKey: _rootNavigatorKey,
+                      builder: (context, state) =>
+                          const PaymentMethodFormScreen(),
+                    ),
+                    GoRoute(
+                      path: ':pmId/edit',
+                      parentNavigatorKey: _rootNavigatorKey,
+                      builder: (context, state) => PaymentMethodFormScreen(
+                        id: state.pathParameters['pmId'],
+                      ),
+                    ),
+                  ],
                 ),
                 GoRoute(
                   path: 'export',

@@ -6,24 +6,31 @@ class ExpenseFilter {
   final String? categoryId;
   final String status;
   final String? searchQuery;
+  final String? paymentMethodId;
 
   const ExpenseFilter({
     this.categoryId,
     this.status = 'active',
     this.searchQuery,
+    this.paymentMethodId,
   });
 
   ExpenseFilter copyWith({
     String? categoryId,
     String? status,
     String? searchQuery,
+    String? paymentMethodId,
     bool clearCategory = false,
     bool clearSearch = false,
+    bool clearPaymentMethod = false,
   }) {
     return ExpenseFilter(
       categoryId: clearCategory ? null : (categoryId ?? this.categoryId),
       status: status ?? this.status,
       searchQuery: clearSearch ? null : (searchQuery ?? this.searchQuery),
+      paymentMethodId: clearPaymentMethod
+          ? null
+          : (paymentMethodId ?? this.paymentMethodId),
     );
   }
 }
@@ -47,5 +54,6 @@ final expenseListProvider = StreamProvider<List<Expense>>((ref) {
     categoryId: filter.categoryId,
     status: filter.status,
     searchQuery: filter.searchQuery,
+    paymentMethodId: filter.paymentMethodId,
   );
 });

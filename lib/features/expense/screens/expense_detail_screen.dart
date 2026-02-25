@@ -7,9 +7,11 @@ import 'package:everypay/core/extensions/date_extensions.dart';
 import 'package:everypay/core/utils/billing_calculator.dart';
 import 'package:everypay/domain/entities/category.dart';
 import 'package:everypay/domain/entities/expense.dart';
+import 'package:everypay/domain/entities/payment_method.dart';
 import 'package:everypay/shared/providers/repository_providers.dart';
 import 'package:everypay/shared/widgets/confirm_dialog.dart';
 import 'package:everypay/shared/widgets/status_badge.dart';
+import 'package:everypay/shared/widgets/payment_method_avatar.dart';
 import 'package:everypay/domain/enums/expense_status.dart';
 
 class ExpenseDetailScreen extends ConsumerWidget {
@@ -45,244 +47,278 @@ class ExpenseDetailScreen extends ConsumerWidget {
           builder: (context, catSnapshot) {
             final category = catSnapshot.data;
 
-            return Scaffold(
-              appBar: AppBar(
-                actions: [
-                  IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () => context.go('/expense/$id/edit'),
+            // Load payment method if assigned
+            final pmFuture = expense.paymentMethodId != null
+                ? ref
+                      .watch(paymentMethodRepositoryProvider)
+                      .getPaymentMethodById(expense.paymentMethodId!)
+                : Future<PaymentMethod?>.value(null);
+
+            return FutureBuilder<PaymentMethod?>(
+              future: pmFuture,
+              builder: (context, pmSnapshot) {
+                final paymentMethod = pmSnapshot.data;
+
+                return Scaffold(
+                  appBar: AppBar(
+                    actions: [
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () => context.go('/expense/$id/edit'),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () async {
+                          final confirmed = await showConfirmDialog(
+                            context,
+                            title: 'Delete Expense',
+                            content:
+                                'Are you sure you want to delete "${expense.name}"?',
+                          );
+                          if (confirmed && context.mounted) {
+                            await ref
+                                .read(expenseRepositoryProvider)
+                                .deleteExpense(id);
+                            if (context.mounted) context.pop();
+                          }
+                        },
+                      ),
+                    ],
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () async {
-                      final confirmed = await showConfirmDialog(
-                        context,
-                        title: 'Delete Expense',
-                        content:
-                            'Are you sure you want to delete "${expense.name}"?',
-                      );
-                      if (confirmed && context.mounted) {
-                        await ref
-                            .read(expenseRepositoryProvider)
-                            .deleteExpense(id);
-                        if (context.mounted) context.pop();
-                      }
-                    },
-                  ),
-                ],
-              ),
-              body: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Header
-                    if (category != null)
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 24,
-                            backgroundColor: categoryColor(
-                              category.colour,
-                            ).withAlpha(30),
-                            child: Icon(
-                              categoryIcon(category.icon),
-                              color: categoryColor(category.colour),
-                            ),
+                  body: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Header
+                        if (category != null)
+                          Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 24,
+                                backgroundColor: categoryColor(
+                                  category.colour,
+                                ).withAlpha(30),
+                                child: Icon(
+                                  categoryIcon(category.icon),
+                                  color: categoryColor(category.colour),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      expense.name,
+                                      style: theme.textTheme.headlineSmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                    if (expense.provider != null)
+                                      Text(
+                                        expense.provider!,
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                              color: theme
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                            ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
+
+                        const SizedBox(height: 24),
+
+                        // Amount card
+                        Card(
+                          color: theme.colorScheme.primaryContainer,
+                          child: Padding(
+                            padding: const EdgeInsets.all(20),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  expense.name,
-                                  style: theme.textTheme.headlineSmall
-                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                  '${expense.amount.formatCurrency(expense.currency)}/mo',
+                                  style: theme.textTheme.headlineMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: theme
+                                            .colorScheme
+                                            .onPrimaryContainer,
+                                      ),
                                 ),
-                                if (expense.provider != null)
-                                  Text(
-                                    expense.provider!,
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: theme.colorScheme.onSurfaceVariant,
-                                    ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${expense.yearlyCost.formatCurrency(expense.currency)} projected/year',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.colorScheme.onPrimaryContainer
+                                        .withAlpha(179),
                                   ),
+                                ),
+                                const SizedBox(height: 12),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    StatusBadge(status: expense.status),
+                                    if (expense.nextDueDate != null) ...[
+                                      const SizedBox(width: 16),
+                                      Text(
+                                        'Due ${expense.nextDueDate!.shortFormatted}',
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                              color: theme
+                                                  .colorScheme
+                                                  .onPrimaryContainer
+                                                  .withAlpha(179),
+                                            ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
                               ],
                             ),
                           ),
-                        ],
-                      ),
+                        ),
 
-                    const SizedBox(height: 24),
+                        const SizedBox(height: 16),
 
-                    // Amount card
-                    Card(
-                      color: theme.colorScheme.primaryContainer,
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          children: [
-                            Text(
-                              '${expense.amount.formatCurrency(expense.currency)}/mo',
-                              style: theme.textTheme.headlineMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.onPrimaryContainer,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${expense.yearlyCost.formatCurrency(expense.currency)} projected/year',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.onPrimaryContainer
-                                    .withAlpha(179),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                        // Details
+                        Text(
+                          'Details',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
                               children: [
-                                StatusBadge(status: expense.status),
-                                if (expense.nextDueDate != null) ...[
-                                  const SizedBox(width: 16),
-                                  Text(
-                                    'Due ${expense.nextDueDate!.shortFormatted}',
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: theme
-                                          .colorScheme
-                                          .onPrimaryContainer
-                                          .withAlpha(179),
-                                    ),
-                                  ),
-                                ],
+                                _detailRow(
+                                  'Category',
+                                  category?.name ?? 'Unknown',
+                                ),
+                                _detailRow(
+                                  'Cycle',
+                                  expense.billingCycle.displayName,
+                                ),
+                                _detailRow(
+                                  'Start Date',
+                                  expense.startDate.formatted,
+                                ),
+                                _detailRow(
+                                  'End Date',
+                                  expense.endDate?.formatted ?? '—',
+                                ),
+                                _detailRow(
+                                  'Total Paid',
+                                  '${BillingCalculator.calculateTotalPaid(expense.startDate, expense.amount, expense.billingCycle, customDays: expense.customDays).formatCurrency(expense.currency)} '
+                                      '(${BillingCalculator.paymentCount(expense.startDate, expense.billingCycle, customDays: expense.customDays)} payments)',
+                                ),
+                                // Payment method row
+                                _paymentMethodRow(
+                                  context,
+                                  paymentMethod,
+                                  expense,
+                                  ref,
+                                ),
                               ],
                             ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
 
-                    const SizedBox(height: 16),
-
-                    // Details
-                    Text(
-                      'Details',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          children: [
-                            _detailRow('Category', category?.name ?? 'Unknown'),
-                            _detailRow(
-                              'Cycle',
-                              expense.billingCycle.displayName,
-                            ),
-                            _detailRow(
-                              'Start Date',
-                              expense.startDate.formatted,
-                            ),
-                            _detailRow(
-                              'End Date',
-                              expense.endDate?.formatted ?? '—',
-                            ),
-                            _detailRow(
-                              'Total Paid',
-                              '${BillingCalculator.calculateTotalPaid(expense.startDate, expense.amount, expense.billingCycle, customDays: expense.customDays).formatCurrency(expense.currency)} '
-                                  '(${BillingCalculator.paymentCount(expense.startDate, expense.billingCycle, customDays: expense.customDays)} payments)',
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    // Notes
-                    if (expense.notes != null && expense.notes!.isNotEmpty) ...[
-                      const SizedBox(height: 16),
-                      Text(
-                        'Notes',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Text(expense.notes!),
-                        ),
-                      ),
-                    ],
-
-                    // Tags
-                    if (expense.tags.isNotEmpty) ...[
-                      const SizedBox(height: 16),
-                      Text(
-                        'Tags',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        children: expense.tags
-                            .map((tag) => Chip(label: Text(tag)))
-                            .toList(),
-                      ),
-                    ],
-
-                    const SizedBox(height: 24),
-
-                    // Actions
-                    if (expense.status == ExpenseStatus.active)
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              icon: const Icon(Icons.pause),
-                              label: const Text('Pause'),
-                              onPressed: () async {
-                                final updated = expense.copyWith(
-                                  status: ExpenseStatus.paused,
-                                  updatedAt: DateTime.now(),
-                                );
-                                await ref
-                                    .read(expenseRepositoryProvider)
-                                    .upsertExpense(updated);
-                                if (context.mounted) context.pop();
-                              },
+                        // Notes
+                        if (expense.notes != null &&
+                            expense.notes!.isNotEmpty) ...[
+                          const SizedBox(height: 16),
+                          Text(
+                            'Notes',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              icon: const Icon(Icons.cancel),
-                              label: const Text('Cancel'),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: Colors.red,
-                              ),
-                              onPressed: () async {
-                                final updated = expense.copyWith(
-                                  status: ExpenseStatus.cancelled,
-                                  endDate: DateTime.now(),
-                                  updatedAt: DateTime.now(),
-                                );
-                                await ref
-                                    .read(expenseRepositoryProvider)
-                                    .upsertExpense(updated);
-                                if (context.mounted) context.pop();
-                              },
+                          const SizedBox(height: 8),
+                          Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Text(expense.notes!),
                             ),
                           ),
                         ],
-                      ),
-                  ],
-                ),
-              ),
+
+                        // Tags
+                        if (expense.tags.isNotEmpty) ...[
+                          const SizedBox(height: 16),
+                          Text(
+                            'Tags',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            children: expense.tags
+                                .map((tag) => Chip(label: Text(tag)))
+                                .toList(),
+                          ),
+                        ],
+
+                        const SizedBox(height: 24),
+
+                        // Actions
+                        if (expense.status == ExpenseStatus.active)
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  icon: const Icon(Icons.pause),
+                                  label: const Text('Pause'),
+                                  onPressed: () async {
+                                    final updated = expense.copyWith(
+                                      status: ExpenseStatus.paused,
+                                      updatedAt: DateTime.now(),
+                                    );
+                                    await ref
+                                        .read(expenseRepositoryProvider)
+                                        .upsertExpense(updated);
+                                    if (context.mounted) context.pop();
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  icon: const Icon(Icons.cancel),
+                                  label: const Text('Cancel'),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: Colors.red,
+                                  ),
+                                  onPressed: () async {
+                                    final updated = expense.copyWith(
+                                      status: ExpenseStatus.cancelled,
+                                      endDate: DateTime.now(),
+                                      updatedAt: DateTime.now(),
+                                    );
+                                    await ref
+                                        .read(expenseRepositoryProvider)
+                                        .upsertExpense(updated);
+                                    if (context.mounted) context.pop();
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             );
           },
         );
@@ -298,6 +334,52 @@ class ExpenseDetailScreen extends ConsumerWidget {
         children: [
           Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
           Flexible(child: Text(value, textAlign: TextAlign.end)),
+        ],
+      ),
+    );
+  }
+
+  Widget _paymentMethodRow(
+    BuildContext context,
+    PaymentMethod? paymentMethod,
+    Expense expense,
+    WidgetRef ref,
+  ) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text('Payment', style: TextStyle(fontWeight: FontWeight.w500)),
+          if (paymentMethod != null)
+            Tooltip(
+              message: paymentMethod.fullLabel,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ExcludeSemantics(
+                    child: PaymentMethodAvatar(
+                      paymentMethod: paymentMethod,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    paymentMethod.compactLabel,
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            )
+          else
+            Tooltip(
+              message: 'Assign payment method to this expense',
+              child: TextButton(
+                onPressed: () => context.go('/expense/$id/edit'),
+                child: const Text('Assign'),
+              ),
+            ),
         ],
       ),
     );

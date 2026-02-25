@@ -12,10 +12,7 @@ class UpcomingStats {
   final double totalAmount;
   final Map<DateTime, List<UpcomingPayment>> groupedByDate;
 
-  const UpcomingStats({
-    required this.totalAmount,
-    required this.groupedByDate,
-  });
+  const UpcomingStats({required this.totalAmount, required this.groupedByDate});
 
   static UpcomingStats compute({
     required List<Expense> expenses,
@@ -52,8 +49,10 @@ class UpcomingStats {
 
     upcoming.sort((a, b) => a.dueDate.compareTo(b.dueDate));
 
-    final totalAmount =
-        upcoming.fold<double>(0, (sum, p) => sum + p.expense.amount);
+    final totalAmount = upcoming.fold<double>(
+      0,
+      (sum, p) => sum + p.expense.amount,
+    );
 
     // Group by date
     final grouped = <DateTime, List<UpcomingPayment>>{};
@@ -66,9 +65,6 @@ class UpcomingStats {
       grouped.putIfAbsent(dateKey, () => []).add(payment);
     }
 
-    return UpcomingStats(
-      totalAmount: totalAmount,
-      groupedByDate: grouped,
-    );
+    return UpcomingStats(totalAmount: totalAmount, groupedByDate: grouped);
   }
 }

@@ -28,8 +28,9 @@ class InsightsCard extends StatelessWidget {
           children: [
             Text(
               'Key Insights',
-              style: theme.textTheme.titleMedium
-                  ?.copyWith(fontWeight: FontWeight.w600),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 12),
             if (biggestExpenseName != null)
@@ -40,7 +41,8 @@ class InsightsCard extends StatelessWidget {
               ),
             _InsightRow(
               icon: Icons.bar_chart,
-              text: '$activeCount active subscription${activeCount == 1 ? '' : 's'}',
+              text:
+                  '$activeCount active subscription${activeCount == 1 ? '' : 's'}',
             ),
             if (activeCount > 0)
               _InsightRow(

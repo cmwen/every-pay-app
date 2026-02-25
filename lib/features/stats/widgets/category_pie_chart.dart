@@ -7,11 +7,7 @@ class CategoryPieChart extends StatelessWidget {
   final List<CategorySpend> data;
   final double size;
 
-  const CategoryPieChart({
-    super.key,
-    required this.data,
-    this.size = 200,
-  });
+  const CategoryPieChart({super.key, required this.data, this.size = 200});
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +21,7 @@ class CategoryPieChart extends StatelessWidget {
     return SizedBox(
       height: size,
       width: size,
-      child: CustomPaint(
-        painter: _PieChartPainter(data: data),
-      ),
+      child: CustomPaint(painter: _PieChartPainter(data: data)),
     );
   }
 }

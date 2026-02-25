@@ -35,6 +35,7 @@ class _MockExpenseRepo implements ExpenseRepository {
     String? categoryId,
     String? status,
     String? searchQuery,
+    String? paymentMethodId,
   }) async* {
     yield _expenses;
   }

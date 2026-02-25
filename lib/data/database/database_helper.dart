@@ -5,7 +5,7 @@ import 'package:everypay/core/constants/category_defaults.dart';
 class DatabaseHelper {
   static Database? _database;
   static const _dbName = 'everypay.db';
-  static const _dbVersion = 1;
+  static const _dbVersion = 2;
 
   static Future<Database> get database async {
     if (_database != null) return _database!;
@@ -89,12 +89,24 @@ class DatabaseHelper {
 
     // Create indexes
     await db.execute(
-        'CREATE INDEX idx_expenses_category ON expenses(category_id)');
+      'CREATE INDEX idx_expenses_category ON expenses(category_id)',
+    );
     await db.execute('CREATE INDEX idx_expenses_status ON expenses(status)');
     await db.execute(
-        'CREATE INDEX idx_expenses_deleted ON expenses(is_deleted)');
+      'CREATE INDEX idx_expenses_deleted ON expenses(is_deleted)',
+    );
     await db.execute(
-        'CREATE INDEX idx_categories_deleted ON categories(is_deleted)');
+      'CREATE INDEX idx_categories_deleted ON categories(is_deleted)',
+    );
+
+    // v2 additions
+    await _createPaymentMethodsTable(db);
+    await db.execute(
+      'ALTER TABLE expenses ADD COLUMN payment_method_id TEXT REFERENCES payment_methods(id)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_expenses_payment_method ON expenses(payment_method_id)',
+    );
 
     // Seed default categories
     final batch = db.batch();
@@ -115,8 +127,40 @@ class DatabaseHelper {
   }
 
   static Future<void> _onUpgrade(
-      Database db, int oldVersion, int newVersion) async {
-    // Future migrations go here
+    Database db,
+    int oldVersion,
+    int newVersion,
+  ) async {
+    if (oldVersion < 2) {
+      await _createPaymentMethodsTable(db);
+      await db.execute(
+        'ALTER TABLE expenses ADD COLUMN payment_method_id TEXT REFERENCES payment_methods(id)',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_expenses_payment_method ON expenses(payment_method_id)',
+      );
+    }
+  }
+
+  static Future<void> _createPaymentMethodsTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS payment_methods (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        type TEXT NOT NULL,
+        last4_digits TEXT,
+        bank_name TEXT,
+        colour_hex TEXT NOT NULL DEFAULT '#546E7A',
+        is_default INTEGER NOT NULL DEFAULT 0,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        is_deleted INTEGER NOT NULL DEFAULT 0
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_payment_methods_deleted ON payment_methods(is_deleted)',
+    );
   }
 
   /// Close the database (for testing)

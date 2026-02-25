@@ -40,7 +40,7 @@ class MonthlyStats {
   static MonthlyStats compute({
     required List<Expense> expenses,
     required Map<String, ({String name, String icon, String colour})>
-        categoryMap,
+    categoryMap,
     required DateTime month,
   }) {
     final activeExpenses = expenses.where((e) => e.isActive).toList();
@@ -67,8 +67,7 @@ class MonthlyStats {
         amount: entry.value,
         percentage: totalSpend > 0 ? (entry.value / totalSpend) * 100 : 0,
       );
-    }).toList()
-      ..sort((a, b) => b.amount.compareTo(a.amount));
+    }).toList()..sort((a, b) => b.amount.compareTo(a.amount));
 
     // Find biggest
     Expense? biggest;
@@ -85,8 +84,9 @@ class MonthlyStats {
       activeCount: activeExpenses.length,
       biggestExpenseName: biggest?.name,
       biggestExpenseAmount: biggest?.monthlyCost,
-      averagePerSubscription:
-          activeExpenses.isEmpty ? 0 : totalSpend / activeExpenses.length,
+      averagePerSubscription: activeExpenses.isEmpty
+          ? 0
+          : totalSpend / activeExpenses.length,
     );
   }
 }

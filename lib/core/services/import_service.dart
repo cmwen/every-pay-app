@@ -29,8 +29,8 @@ class ImportService {
   ImportService({
     required ExpenseRepository expenseRepo,
     required CategoryRepository categoryRepo,
-  })  : _expenseRepo = expenseRepo,
-        _categoryRepo = categoryRepo;
+  }) : _expenseRepo = expenseRepo,
+       _categoryRepo = categoryRepo;
 
   /// Import data from JSON string. Merges with existing data (upsert).
   Future<ImportResult> importJson(String jsonString) async {
@@ -82,38 +82,38 @@ class ImportService {
   }
 
   Expense _expenseFromJson(Map<String, dynamic> m) => Expense(
-        id: m['id'] as String,
-        name: m['name'] as String,
-        provider: m['provider'] as String?,
-        categoryId: m['category_id'] as String,
-        amount: (m['amount'] as num).toDouble(),
-        currency: m['currency'] as String? ?? 'USD',
-        billingCycle: BillingCycle.values.byName(m['billing_cycle'] as String),
-        customDays: m['custom_days'] as int?,
-        startDate: DateTime.parse(m['start_date'] as String),
-        endDate: m['end_date'] != null
-            ? DateTime.parse(m['end_date'] as String)
-            : null,
-        nextDueDate: m['next_due_date'] != null
-            ? DateTime.parse(m['next_due_date'] as String)
-            : null,
-        status: ExpenseStatus.values.byName(m['status'] as String),
-        notes: m['notes'] as String?,
-        logoAsset: m['logo_asset'] as String?,
-        tags: (m['tags'] as List<dynamic>?)?.cast<String>() ?? const [],
-        createdAt: DateTime.parse(m['created_at'] as String),
-        updatedAt: DateTime.parse(m['updated_at'] as String),
-        deviceId: m['device_id'] as String? ?? 'imported',
-      );
+    id: m['id'] as String,
+    name: m['name'] as String,
+    provider: m['provider'] as String?,
+    categoryId: m['category_id'] as String,
+    amount: (m['amount'] as num).toDouble(),
+    currency: m['currency'] as String? ?? 'USD',
+    billingCycle: BillingCycle.values.byName(m['billing_cycle'] as String),
+    customDays: m['custom_days'] as int?,
+    startDate: DateTime.parse(m['start_date'] as String),
+    endDate: m['end_date'] != null
+        ? DateTime.parse(m['end_date'] as String)
+        : null,
+    nextDueDate: m['next_due_date'] != null
+        ? DateTime.parse(m['next_due_date'] as String)
+        : null,
+    status: ExpenseStatus.values.byName(m['status'] as String),
+    notes: m['notes'] as String?,
+    logoAsset: m['logo_asset'] as String?,
+    tags: (m['tags'] as List<dynamic>?)?.cast<String>() ?? const [],
+    createdAt: DateTime.parse(m['created_at'] as String),
+    updatedAt: DateTime.parse(m['updated_at'] as String),
+    deviceId: m['device_id'] as String? ?? 'imported',
+  );
 
   Category _categoryFromJson(Map<String, dynamic> m) => Category(
-        id: m['id'] as String,
-        name: m['name'] as String,
-        icon: m['icon'] as String? ?? 'category',
-        colour: m['colour'] as String? ?? '#546E7A',
-        isDefault: m['is_default'] as bool? ?? false,
-        sortOrder: m['sort_order'] as int? ?? 0,
-        createdAt: DateTime.parse(m['created_at'] as String),
-        updatedAt: DateTime.parse(m['updated_at'] as String),
-      );
+    id: m['id'] as String,
+    name: m['name'] as String,
+    icon: m['icon'] as String? ?? 'category',
+    colour: m['colour'] as String? ?? '#546E7A',
+    isDefault: m['is_default'] as bool? ?? false,
+    sortOrder: m['sort_order'] as int? ?? 0,
+    createdAt: DateTime.parse(m['created_at'] as String),
+    updatedAt: DateTime.parse(m['updated_at'] as String),
+  );
 }

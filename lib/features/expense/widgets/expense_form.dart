@@ -3,8 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:everypay/core/constants/app_constants.dart';
 import 'package:everypay/core/constants/category_defaults.dart';
 import 'package:everypay/domain/entities/expense.dart';
+import 'package:everypay/domain/entities/payment_method.dart';
 import 'package:everypay/domain/enums/billing_cycle.dart';
+import 'package:everypay/features/expense/widgets/payment_method_picker.dart';
 import 'package:everypay/shared/providers/repository_providers.dart';
+import 'package:everypay/shared/widgets/payment_method_avatar.dart';
 
 class ExpenseFormData {
   final String name;
@@ -18,6 +21,7 @@ class ExpenseFormData {
   final DateTime? endDate;
   final String? notes;
   final List<String> tags;
+  final String? paymentMethodId;
 
   const ExpenseFormData({
     required this.name,
@@ -31,6 +35,7 @@ class ExpenseFormData {
     this.endDate,
     this.notes,
     this.tags = const [],
+    this.paymentMethodId,
   });
 }
 
@@ -65,6 +70,8 @@ class _ExpenseFormState extends ConsumerState<ExpenseForm> {
   DateTime? _startDate;
   DateTime? _endDate;
   late List<String> _tags;
+  String? _paymentMethodId;
+  PaymentMethod? _selectedPaymentMethod;
   bool _saving = false;
 
   @override
@@ -86,6 +93,7 @@ class _ExpenseFormState extends ConsumerState<ExpenseForm> {
     _startDate = e?.startDate;
     _endDate = e?.endDate;
     _tags = e?.tags.toList() ?? [];
+    _paymentMethodId = e?.paymentMethodId;
   }
 
   @override
@@ -101,6 +109,19 @@ class _ExpenseFormState extends ConsumerState<ExpenseForm> {
   @override
   Widget build(BuildContext context) {
     final categoriesAsync = ref.watch(categoriesProvider);
+    // Load the selected payment method name when it changes
+    if (_paymentMethodId != null && _selectedPaymentMethod == null) {
+      ref.watch(allPaymentMethodsProvider).whenData((methods) {
+        final found = methods.where((m) => m.id == _paymentMethodId);
+        if (found.isNotEmpty && mounted) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              setState(() => _selectedPaymentMethod = found.first);
+            }
+          });
+        }
+      });
+    }
 
     return Form(
       key: _formKey,
@@ -257,8 +278,9 @@ class _ExpenseFormState extends ConsumerState<ExpenseForm> {
               initialValue: _customDays?.toString(),
               validator: (v) {
                 if (_billingCycle == BillingCycle.custom) {
-                  if (v == null || v.isEmpty)
+                  if (v == null || v.isEmpty) {
                     return 'Required for custom cycle';
+                  }
                   final days = int.tryParse(v);
                   if (days == null || days <= 0) return 'Enter valid days';
                 }
@@ -301,6 +323,32 @@ class _ExpenseFormState extends ConsumerState<ExpenseForm> {
             decoration: const InputDecoration(labelText: 'Notes'),
             maxLines: 3,
             textCapitalization: TextCapitalization.sentences,
+          ),
+          const SizedBox(height: 16),
+
+          // Payment Method picker
+          _PaymentMethodField(
+            selectedMethod: _selectedPaymentMethod,
+            onTap: () async {
+              final selected = await showPaymentMethodPicker(
+                context,
+                ref,
+                currentId: _paymentMethodId,
+              );
+              // null return means "clear" only when explicitly clearing
+              // (the picker returns null for both close and clear — we
+              //  distinguish by checking if currently set)
+              if (mounted) {
+                setState(() {
+                  _selectedPaymentMethod = selected;
+                  _paymentMethodId = selected?.id;
+                });
+              }
+            },
+            onClear: () => setState(() {
+              _selectedPaymentMethod = null;
+              _paymentMethodId = null;
+            }),
           ),
           const SizedBox(height: 16),
 
@@ -380,11 +428,67 @@ class _ExpenseFormState extends ConsumerState<ExpenseForm> {
               ? null
               : _notesController.text.trim(),
           tags: _tags,
+          paymentMethodId: _paymentMethodId,
         ),
       );
     } finally {
       if (mounted) setState(() => _saving = false);
     }
+  }
+}
+
+class _PaymentMethodField extends StatelessWidget {
+  final PaymentMethod? selectedMethod;
+  final VoidCallback onTap;
+  final VoidCallback onClear;
+
+  const _PaymentMethodField({
+    required this.selectedMethod,
+    required this.onTap,
+    required this.onClear,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(4),
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: 'Payment Method',
+          hintText: 'Optional',
+          suffixIcon: selectedMethod != null
+              ? IconButton(
+                  icon: const Icon(Icons.clear, size: 18),
+                  onPressed: onClear,
+                )
+              : const Icon(Icons.chevron_right),
+        ),
+        child: selectedMethod != null
+            ? Row(
+                children: [
+                  ExcludeSemantics(
+                    child: PaymentMethodAvatar(
+                      paymentMethod: selectedMethod!,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    selectedMethod!.fullLabel,
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                ],
+              )
+            : Text(
+                'None selected',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.hintColor,
+                ),
+              ),
+      ),
+    );
   }
 }
 

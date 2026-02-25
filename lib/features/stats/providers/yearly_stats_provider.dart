@@ -49,11 +49,7 @@ class YearlyStats {
     for (int m = 1; m <= 12; m++) {
       final isProjected = m > currentMonth;
       final amount = monthlyTotal; // Simplified: same cost each month
-      months.add(MonthData(
-        month: m,
-        amount: amount,
-        isProjected: isProjected,
-      ));
+      months.add(MonthData(month: m, amount: amount, isProjected: isProjected));
       if (!isProjected) totalActual += amount;
     }
 
@@ -62,10 +58,8 @@ class YearlyStats {
     final actualMonths = months.where((m) => !m.isProjected).toList();
     MonthData? highest, lowest;
     if (actualMonths.isNotEmpty) {
-      highest = actualMonths.reduce(
-          (a, b) => a.amount >= b.amount ? a : b);
-      lowest = actualMonths.reduce(
-          (a, b) => a.amount <= b.amount ? a : b);
+      highest = actualMonths.reduce((a, b) => a.amount >= b.amount ? a : b);
+      lowest = actualMonths.reduce((a, b) => a.amount <= b.amount ? a : b);
     }
 
     return YearlyStats(

@@ -11,8 +11,8 @@ class ExportService {
   ExportService({
     required ExpenseRepository expenseRepo,
     required CategoryRepository categoryRepo,
-  })  : _expenseRepo = expenseRepo,
-        _categoryRepo = categoryRepo;
+  }) : _expenseRepo = expenseRepo,
+       _categoryRepo = categoryRepo;
 
   /// Export all data as JSON string
   Future<String> exportJson() async {
@@ -68,34 +68,34 @@ class ExportService {
   }
 
   Map<String, dynamic> _expenseToJson(Expense e) => {
-        'id': e.id,
-        'name': e.name,
-        'provider': e.provider,
-        'category_id': e.categoryId,
-        'amount': e.amount,
-        'currency': e.currency,
-        'billing_cycle': e.billingCycle.name,
-        'custom_days': e.customDays,
-        'start_date': e.startDate.toIso8601String(),
-        'end_date': e.endDate?.toIso8601String(),
-        'next_due_date': e.nextDueDate?.toIso8601String(),
-        'status': e.status.name,
-        'notes': e.notes,
-        'logo_asset': e.logoAsset,
-        'tags': e.tags,
-        'created_at': e.createdAt.toIso8601String(),
-        'updated_at': e.updatedAt.toIso8601String(),
-        'device_id': e.deviceId,
-      };
+    'id': e.id,
+    'name': e.name,
+    'provider': e.provider,
+    'category_id': e.categoryId,
+    'amount': e.amount,
+    'currency': e.currency,
+    'billing_cycle': e.billingCycle.name,
+    'custom_days': e.customDays,
+    'start_date': e.startDate.toIso8601String(),
+    'end_date': e.endDate?.toIso8601String(),
+    'next_due_date': e.nextDueDate?.toIso8601String(),
+    'status': e.status.name,
+    'notes': e.notes,
+    'logo_asset': e.logoAsset,
+    'tags': e.tags,
+    'created_at': e.createdAt.toIso8601String(),
+    'updated_at': e.updatedAt.toIso8601String(),
+    'device_id': e.deviceId,
+  };
 
   Map<String, dynamic> _categoryToJson(Category c) => {
-        'id': c.id,
-        'name': c.name,
-        'icon': c.icon,
-        'colour': c.colour,
-        'is_default': c.isDefault,
-        'sort_order': c.sortOrder,
-        'created_at': c.createdAt.toIso8601String(),
-        'updated_at': c.updatedAt.toIso8601String(),
-      };
+    'id': c.id,
+    'name': c.name,
+    'icon': c.icon,
+    'colour': c.colour,
+    'is_default': c.isDefault,
+    'sort_order': c.sortOrder,
+    'created_at': c.createdAt.toIso8601String(),
+    'updated_at': c.updatedAt.toIso8601String(),
+  };
 }

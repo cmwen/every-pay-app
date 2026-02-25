@@ -5,7 +5,6 @@ import 'package:everypay/core/extensions/currency_extensions.dart';
 import 'package:everypay/core/extensions/date_extensions.dart';
 import 'package:everypay/core/constants/category_defaults.dart';
 import 'package:everypay/domain/entities/category.dart';
-import 'package:everypay/domain/entities/expense.dart';
 import 'package:everypay/shared/providers/repository_providers.dart';
 import 'package:everypay/shared/widgets/empty_state.dart';
 import 'package:everypay/features/stats/providers/monthly_stats_provider.dart';
@@ -34,11 +33,7 @@ class StatsScreen extends ConsumerWidget {
           ),
         ),
         body: const TabBarView(
-          children: [
-            _MonthlyTab(),
-            _YearlyTab(),
-            _UpcomingTab(),
-          ],
+          children: [_MonthlyTab(), _YearlyTab(), _UpcomingTab()],
         ),
       ),
     );
@@ -58,19 +53,13 @@ class _MonthlyTabState extends ConsumerState<_MonthlyTab> {
 
   void _previousMonth() {
     setState(() {
-      _selectedMonth = DateTime(
-        _selectedMonth.year,
-        _selectedMonth.month - 1,
-      );
+      _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month - 1);
     });
   }
 
   void _nextMonth() {
     setState(() {
-      _selectedMonth = DateTime(
-        _selectedMonth.year,
-        _selectedMonth.month + 1,
-      );
+      _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month + 1);
     });
   }
 
@@ -91,8 +80,8 @@ class _MonthlyTabState extends ConsumerState<_MonthlyTab> {
           );
         }
 
-        final categoryMap = <String,
-            ({String name, String icon, String colour})>{};
+        final categoryMap =
+            <String, ({String name, String icon, String colour})>{};
         final cats = switch (categoriesAsync) {
           AsyncData(:final value) => value,
           _ => <Category>[],
@@ -149,9 +138,7 @@ class _MonthlyTabState extends ConsumerState<_MonthlyTab> {
             ),
             const SizedBox(height: 24),
             // Pie chart
-            Center(
-              child: CategoryPieChart(data: stats.categoryBreakdown),
-            ),
+            Center(child: CategoryPieChart(data: stats.categoryBreakdown)),
             const SizedBox(height: 16),
             // Category legend
             ...stats.categoryBreakdown.map(
@@ -302,9 +289,9 @@ class _SummaryChip extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               value,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -313,97 +300,146 @@ class _SummaryChip extends StatelessWidget {
   }
 }
 
-// Upcoming tab
-class _UpcomingTab extends ConsumerWidget {
+// Upcoming tab — enhanced with 7/30-day toggle and UpcomingListItem
+class _UpcomingTab extends ConsumerStatefulWidget {
   const _UpcomingTab();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_UpcomingTab> createState() => _UpcomingTabState();
+}
+
+class _UpcomingTabState extends ConsumerState<_UpcomingTab> {
+  int _days = 7;
+
+  @override
+  Widget build(BuildContext context) {
     final expensesAsync = ref.watch(allExpensesProvider);
+    final categoriesAsync = ref.watch(categoriesProvider);
 
-    return expensesAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
-      data: (expenses) {
-        final stats = UpcomingStats.compute(
-          expenses: expenses,
-          days: 30,
-        );
+    final categoryMap = <String, Category>{};
+    if (categoriesAsync is AsyncData<List<Category>>) {
+      for (final c in categoriesAsync.value) {
+        categoryMap[c.id] = c;
+      }
+    }
 
-        if (stats.groupedByDate.isEmpty) {
-          return const EmptyStateView(
-            icon: Icons.event,
-            title: 'No upcoming payments',
-            subtitle: 'Your next 30 days look clear!',
-          );
-        }
+    return Column(
+      children: [
+        // Toggle
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: SegmentedButton<int>(
+            segments: const [
+              ButtonSegment(value: 7, label: Text('This Week')),
+              ButtonSegment(value: 30, label: Text('This Month')),
+            ],
+            selected: {_days},
+            onSelectionChanged: (set) {
+              if (set.isNotEmpty) setState(() => _days = set.first);
+            },
+          ),
+        ),
 
-        final sortedDates = stats.groupedByDate.keys.toList()..sort();
+        Expanded(
+          child: expensesAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => Center(child: Text('Error: $e')),
+            data: (expenses) {
+              final stats = UpcomingStats.compute(
+                expenses: expenses,
+                days: _days,
+              );
 
-        return ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
+              if (stats.groupedByDate.isEmpty) {
+                return EmptyStateView(
+                  icon: Icons.event,
+                  title: 'No upcoming payments',
+                  subtitle: 'Nothing due in the next $_days days!',
+                );
+              }
+
+              final sortedDates = stats.groupedByDate.keys.toList()..sort();
+
+              return AnimatedSwitcher(
+                duration: const Duration(milliseconds: 250),
+                child: ListView(
+                  key: ValueKey(_days),
+                  padding: const EdgeInsets.all(16),
                   children: [
-                    Text(
-                      'Next 30 Days',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      stats.totalAmount.formatCurrency(),
-                      style:
-                          Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            ...sortedDates.map((date) {
-              final payments = stats.groupedByDate[date]!;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Text(
-                      date.daysFromNow(),
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                  ),
-                  ...payments.map(
-                    (p) => ListTile(
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.payment),
-                      title: Text(p.expense.name),
-                      subtitle: Text(
-                        p.expense.provider ?? p.expense.billingCycle.displayName,
-                      ),
-                      trailing: Text(
-                        p.expense.amount.formatCurrency(p.expense.currency),
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
+                    // Total card
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          children: [
+                            Text(
+                              'Next $_days Days',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              stats.totalAmount.formatCurrency(),
+                              style: Theme.of(context).textTheme.headlineMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                  ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 16),
+
+                    ...sortedDates.map((date) {
+                      final payments = stats.groupedByDate[date]!;
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Text(
+                              date.daysFromNow(),
+                              style: Theme.of(context).textTheme.titleSmall
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                  ),
+                            ),
+                          ),
+                          ...payments.map(
+                            (p) => ListTile(
+                              dense: true,
+                              contentPadding: EdgeInsets.zero,
+                              leading: const Icon(Icons.payment),
+                              title: Text(p.expense.name),
+                              subtitle: Text(
+                                p.expense.provider ??
+                                    p.expense.billingCycle.displayName,
+                              ),
+                              trailing: Text(
+                                p.expense.amount.formatCurrency(
+                                  p.expense.currency,
+                                ),
+                                style: Theme.of(context).textTheme.titleSmall
+                                    ?.copyWith(fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
+                  ],
+                ),
               );
-            }),
-          ],
-        );
-      },
+            },
+          ),
+        ),
+      ],
     );
   }
 }

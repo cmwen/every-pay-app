@@ -20,6 +20,7 @@ class Expense {
   final DateTime createdAt;
   final DateTime updatedAt;
   final String deviceId;
+  final String? paymentMethodId;
 
   const Expense({
     required this.id,
@@ -40,6 +41,7 @@ class Expense {
     required this.createdAt,
     required this.updatedAt,
     required this.deviceId,
+    this.paymentMethodId,
   });
 
   double get monthlyCost => amount * billingCycle.monthlyMultiplier(customDays);
@@ -78,6 +80,8 @@ class Expense {
     DateTime? createdAt,
     DateTime? updatedAt,
     String? deviceId,
+    String? paymentMethodId,
+    bool clearPaymentMethod = false,
   }) {
     return Expense(
       id: id ?? this.id,
@@ -98,6 +102,9 @@ class Expense {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deviceId: deviceId ?? this.deviceId,
+      paymentMethodId: clearPaymentMethod
+          ? null
+          : (paymentMethodId ?? this.paymentMethodId),
     );
   }
 }

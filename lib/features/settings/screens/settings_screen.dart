@@ -53,6 +53,18 @@ class SettingsScreen extends ConsumerWidget {
             ),
             onTap: () => context.go('/settings/categories'),
           ),
+          ListTile(
+            leading: const Icon(Icons.credit_card),
+            title: const Text('Payment Methods'),
+            trailing: ref
+                .watch(allPaymentMethodsProvider)
+                .when(
+                  data: (methods) => Text('${methods.length}'),
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, _) => const SizedBox.shrink(),
+                ),
+            onTap: () => context.go('/settings/payment-methods'),
+          ),
 
           // Data section
           _SectionHeader(title: 'DATA'),

@@ -6,11 +6,7 @@ class MonthlyBarChart extends StatelessWidget {
   final List<MonthData> months;
   final double height;
 
-  const MonthlyBarChart({
-    super.key,
-    required this.months,
-    this.height = 200,
-  });
+  const MonthlyBarChart({super.key, required this.months, this.height = 200});
 
   static const _monthLabels = [
     'J',
@@ -30,8 +26,9 @@ class MonthlyBarChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final maxAmount =
-        months.isEmpty ? 100.0 : months.map((m) => m.amount).reduce(max);
+    final maxAmount = months.isEmpty
+        ? 100.0
+        : months.map((m) => m.amount).reduce(max);
 
     return SizedBox(
       height: height,
@@ -39,8 +36,9 @@ class MonthlyBarChart extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: List.generate(months.length, (index) {
           final month = months[index];
-          final barHeight =
-              maxAmount > 0 ? (month.amount / maxAmount) * (height - 30) : 0.0;
+          final barHeight = maxAmount > 0
+              ? (month.amount / maxAmount) * (height - 30)
+              : 0.0;
 
           return Expanded(
             child: Column(
@@ -59,10 +57,7 @@ class MonthlyBarChart extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  _monthLabels[index],
-                  style: theme.textTheme.labelSmall,
-                ),
+                Text(_monthLabels[index], style: theme.textTheme.labelSmall),
               ],
             ),
           );

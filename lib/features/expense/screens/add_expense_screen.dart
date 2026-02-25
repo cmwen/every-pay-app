@@ -29,8 +29,9 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
   }
 
   Future<void> _openLibrary() async {
-    final template =
-        await context.push<ServiceTemplate>('/expense/add/library');
+    final template = await context.push<ServiceTemplate>(
+      '/expense/add/library',
+    );
     if (template != null && mounted) {
       setState(() {
         // Convert template to a lightweight Expense for pre-filling the form.
@@ -90,6 +91,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
             createdAt: now,
             updatedAt: now,
             deviceId: 'local',
+            paymentMethodId: formData.paymentMethodId,
           );
 
           await ref.read(expenseRepositoryProvider).upsertExpense(expense);

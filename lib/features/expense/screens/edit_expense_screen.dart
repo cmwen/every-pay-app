@@ -54,6 +54,8 @@ class EditExpenseScreen extends ConsumerWidget {
                 notes: formData.notes,
                 tags: formData.tags,
                 updatedAt: DateTime.now(),
+                paymentMethodId: formData.paymentMethodId,
+                clearPaymentMethod: formData.paymentMethodId == null,
               );
 
               await ref.read(expenseRepositoryProvider).upsertExpense(updated);
