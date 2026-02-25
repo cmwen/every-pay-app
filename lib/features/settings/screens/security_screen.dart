@@ -1,30 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:everypay/features/settings/providers/security_provider.dart';
 
-class SecurityScreen extends StatelessWidget {
+class SecurityScreen extends ConsumerWidget {
   const SecurityScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final biometricAsync = ref.watch(biometricEnabledProvider);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Security')),
       body: ListView(
         children: [
           _SectionHeader(title: 'APP LOCK'),
-          SwitchListTile(
-            secondary: const Icon(Icons.fingerprint),
-            title: const Text('Biometric Lock'),
-            subtitle: const Text('Require fingerprint or face to open app'),
-            value: false,
-            onChanged: (value) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Biometric lock requires device hardware. '
-                    'Full implementation coming soon.',
-                  ),
-                ),
-              );
-            },
+          biometricAsync.when(
+            data: (enabled) => SwitchListTile(
+              secondary: const Icon(Icons.fingerprint),
+              title: const Text('Biometric Lock'),
+              subtitle: const Text('Require fingerprint or face to open app'),
+              value: enabled,
+              onChanged: (value) => _onToggle(context, ref, value),
+            ),
+            loading: () => const ListTile(
+              leading: Icon(Icons.fingerprint),
+              title: Text('Biometric Lock'),
+              trailing: SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+    error: (_, _) => ListTile(
+              leading: const Icon(Icons.fingerprint),
+              title: const Text('Biometric Lock'),
+              subtitle: const Text('Unavailable on this device'),
+              enabled: false,
+            ),
           ),
           _SectionHeader(title: 'DATA PROTECTION'),
           ListTile(
@@ -53,6 +65,35 @@ class SecurityScreen extends StatelessWidget {
       ),
     );
   }
+
+  Future<void> _onToggle(
+    BuildContext context,
+    WidgetRef ref,
+    bool enable,
+  ) async {
+    if (enable) {
+      // Verify biometric works before enabling.
+      final service = ref.read(biometricServiceProvider);
+      final canAuth = await service.canAuthenticate();
+      if (!canAuth) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('No biometric hardware available on this device.'),
+            ),
+          );
+        }
+        return;
+      }
+      final authenticated = await service.authenticate(
+        reason: 'Confirm your identity to enable Biometric Lock',
+      );
+      if (!authenticated) return;
+    }
+    await ref.read(biometricEnabledProvider.notifier).setEnabled(enable);
+    // Ensure app stays unlocked after toggling.
+    ref.read(appLockedProvider.notifier).setLocked(false);
+  }
 }
 
 class _SectionHeader extends StatelessWidget {
@@ -74,3 +115,4 @@ class _SectionHeader extends StatelessWidget {
     );
   }
 }
+

@@ -40,6 +40,10 @@ class HomeScreen extends ConsumerWidget {
           final summary = HomeSummary.compute(expenses);
 
           if (expenses.isEmpty) {
+            final filter = ref.watch(expenseFilterProvider);
+            final hasActiveFilter =
+                filter.categoryId != null || filter.paymentMethodId != null;
+
             return Column(
               children: [
                 Padding(
@@ -47,13 +51,27 @@ class HomeScreen extends ConsumerWidget {
                   child: SummaryCard(summary: summary),
                 ),
                 const DueSoonSection(),
-                const Expanded(
-                  child: EmptyStateView(
-                    icon: Icons.celebration,
-                    title: 'No expenses yet!',
-                    subtitle:
-                        'Tap + to add your first subscription or recurring expense.',
-                  ),
+                if (hasActiveFilter) const FilterChips(),
+                Expanded(
+                  child: hasActiveFilter
+                      ? EmptyStateView(
+                          icon: Icons.filter_list_off,
+                          title: 'No results',
+                          subtitle: 'No expenses match the selected filter.',
+                          action: TextButton.icon(
+                            onPressed: () => ref
+                                .read(expenseFilterProvider.notifier)
+                                .setFilter(const ExpenseFilter()),
+                            icon: const Icon(Icons.clear),
+                            label: const Text('Clear filter'),
+                          ),
+                        )
+                      : const EmptyStateView(
+                          icon: Icons.celebration,
+                          title: 'No expenses yet!',
+                          subtitle:
+                              'Tap + to add your first subscription or recurring expense.',
+                        ),
                 ),
               ],
             );
