@@ -22,12 +22,16 @@ class TourOverlay extends ConsumerWidget {
 
     final step = steps[stepIndex];
 
-    return _TourOverlayContent(
-      step: step,
-      stepIndex: stepIndex,
-      totalSteps: steps.length,
-      onNext: () => ref.read(demoModeProvider.notifier).nextStep(),
-      onSkip: () => ref.read(demoModeProvider.notifier).dismissTour(),
+    // Fill the full screen so the canvas coordinate space == screen space,
+    // matching renderBox.localToGlobal values exactly.
+    return Positioned.fill(
+      child: _TourOverlayContent(
+        step: step,
+        stepIndex: stepIndex,
+        totalSteps: steps.length,
+        onNext: () => ref.read(demoModeProvider.notifier).nextStep(),
+        onSkip: () => ref.read(demoModeProvider.notifier).dismissTour(),
+      ),
     );
   }
 }

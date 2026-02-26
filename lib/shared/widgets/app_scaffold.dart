@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:everypay/features/demo/providers/demo_mode_provider.dart';
 import 'package:everypay/features/demo/widgets/demo_banner.dart';
-import 'package:everypay/features/demo/widgets/tour_overlay.dart';
 import 'package:everypay/features/demo/widgets/tour_step_config.dart';
 
 class AppScaffold extends ConsumerWidget {
@@ -13,19 +11,13 @@ class AppScaffold extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final demoState = ref.watch(demoModeProvider);
     final registry = TourTargetRegistry.instance;
 
     return Scaffold(
-      body: Stack(
+      body: Column(
         children: [
-          Column(
-            children: [
-              const DemoBanner(),
-              Expanded(child: navigationShell),
-            ],
-          ),
-          if (demoState.isTourActive) const TourOverlay(),
+          const DemoBanner(),
+          Expanded(child: navigationShell),
         ],
       ),
       bottomNavigationBar: NavigationBar(

@@ -22,8 +22,11 @@ class _AppLockWrapperState extends ConsumerState<AppLockWrapper>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // Attempt auth on first launch if biometric is enabled.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _lockIfEnabled());
+    // Lock and immediately attempt auth on first launch if biometric is enabled.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _lockIfEnabled();
+      _authenticateIfLocked();
+    });
   }
 
   @override
@@ -54,13 +57,14 @@ class _AppLockWrapperState extends ConsumerState<AppLockWrapper>
   }
 
   Future<void> _lockIfEnabled() async {
-    final biometric = ref.read(biometricEnabledProvider);
-    final enabled = switch (biometric) {
-      AsyncData(:final value) => value,
-      _ => false,
-    };
-    if (enabled) {
-      ref.read(appLockedProvider.notifier).setLocked(true);
+    try {
+      // Await SharedPreferences load — provider may still be AsyncLoading
+      final enabled = await ref.read(biometricEnabledProvider.future);
+      if (enabled && mounted) {
+        ref.read(appLockedProvider.notifier).setLocked(true);
+      }
+    } catch (_) {
+      // Provider failed to load — leave unlocked
     }
   }
 
