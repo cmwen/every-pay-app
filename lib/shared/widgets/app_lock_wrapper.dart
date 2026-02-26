@@ -46,6 +46,9 @@ class _AppLockWrapperState extends ConsumerState<AppLockWrapper>
   }
 
   Future<void> _onResumed() async {
+    // We're returning from the biometric prompt — don't re-lock mid-auth.
+    if (_authenticating) return;
+
     final bg = _backgroundedAt;
     _backgroundedAt = null;
     if (bg != null && DateTime.now().difference(bg) < _gracePeriod) {
@@ -60,7 +63,9 @@ class _AppLockWrapperState extends ConsumerState<AppLockWrapper>
     try {
       // Await SharedPreferences load — provider may still be AsyncLoading
       final enabled = await ref.read(biometricEnabledProvider.future);
-      if (enabled && mounted) {
+      // Don't lock if auth is in progress (resumed from biometric dialog)
+      // or if the app was already unlocked by the time we get here.
+      if (enabled && mounted && !_authenticating) {
         ref.read(appLockedProvider.notifier).setLocked(true);
       }
     } catch (_) {
