@@ -8,14 +8,22 @@ import 'package:everypay/domain/entities/payment_method.dart';
 import 'package:everypay/domain/repositories/expense_repository.dart';
 import 'package:everypay/domain/repositories/category_repository.dart';
 import 'package:everypay/domain/repositories/payment_method_repository.dart';
+import 'package:everypay/features/demo/providers/demo_mode_provider.dart';
+import 'package:everypay/features/demo/data/demo_expense_repository.dart';
+import 'package:everypay/features/demo/data/demo_category_repository.dart';
+import 'package:everypay/features/demo/data/demo_payment_method_repository.dart';
 
 final expenseRepositoryProvider = Provider<ExpenseRepository>((ref) {
+  final demo = ref.watch(demoModeProvider);
+  if (demo.isActive) return DemoExpenseRepository();
   final repo = SqliteExpenseRepository();
   ref.onDispose(() => repo.dispose());
   return repo;
 });
 
 final categoryRepositoryProvider = Provider<CategoryRepository>((ref) {
+  final demo = ref.watch(demoModeProvider);
+  if (demo.isActive) return DemoCategoryRepository();
   final repo = SqliteCategoryRepository();
   ref.onDispose(() => repo.dispose());
   return repo;
@@ -24,6 +32,8 @@ final categoryRepositoryProvider = Provider<CategoryRepository>((ref) {
 final paymentMethodRepositoryProvider = Provider<PaymentMethodRepository>((
   ref,
 ) {
+  final demo = ref.watch(demoModeProvider);
+  if (demo.isActive) return DemoPaymentMethodRepository();
   final repo = SqlitePaymentMethodRepository();
   ref.onDispose(() => repo.dispose());
   return repo;

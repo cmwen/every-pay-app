@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:everypay/features/demo/providers/demo_mode_provider.dart';
 import 'package:everypay/shared/providers/repository_providers.dart';
 import 'package:everypay/shared/providers/theme_provider.dart';
 
@@ -10,6 +11,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
+    final demoState = ref.watch(demoModeProvider);
 
     final categoriesAsync = ref.watch(categoriesProvider);
 
@@ -39,6 +41,28 @@ class SettingsScreen extends ConsumerWidget {
                 }
               },
             ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.science),
+            title: const Text('Demo Mode'),
+            subtitle: Text(
+              demoState.isActive
+                  ? 'Currently active — viewing demo data'
+                  : 'Explore the app with sample data',
+            ),
+            trailing: demoState.isActive
+                ? TextButton(
+                    onPressed: () =>
+                        ref.read(demoModeProvider.notifier).deactivate(),
+                    child: const Text('Exit'),
+                  )
+                : FilledButton.tonal(
+                    onPressed: () {
+                      ref.read(demoModeProvider.notifier).activate();
+                      context.go('/');
+                    },
+                    child: const Text('Try'),
+                  ),
           ),
 
           // Organisation section

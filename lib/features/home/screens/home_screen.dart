@@ -9,6 +9,8 @@ import 'package:everypay/features/home/widgets/due_soon_section.dart';
 import 'package:everypay/features/home/widgets/summary_card.dart';
 import 'package:everypay/features/home/widgets/expense_list_item.dart';
 import 'package:everypay/features/home/widgets/filter_chips.dart';
+import 'package:everypay/features/demo/providers/demo_mode_provider.dart';
+import 'package:everypay/features/demo/widgets/tour_step_config.dart';
 import 'package:everypay/shared/providers/repository_providers.dart';
 import 'package:everypay/shared/widgets/empty_state.dart';
 
@@ -19,6 +21,8 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final expensesAsync = ref.watch(expenseListProvider);
     final categoriesAsync = ref.watch(categoriesProvider);
+    final demoState = ref.watch(demoModeProvider);
+    final registry = TourTargetRegistry.instance;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Every-Pay')),
@@ -66,11 +70,19 @@ class HomeScreen extends ConsumerWidget {
                             label: const Text('Clear filter'),
                           ),
                         )
-                      : const EmptyStateView(
+                      : EmptyStateView(
                           icon: Icons.celebration,
                           title: 'No expenses yet!',
                           subtitle:
                               'Tap + to add your first subscription or recurring expense.',
+                          action: demoState.isActive
+                              ? null
+                              : FilledButton.tonal(
+                                  onPressed: () => ref
+                                      .read(demoModeProvider.notifier)
+                                      .activate(),
+                                  child: const Text('Try Demo'),
+                                ),
                         ),
                 ),
               ],
@@ -84,9 +96,12 @@ class HomeScreen extends ConsumerWidget {
                   horizontal: 16,
                   vertical: 8,
                 ),
-                child: SummaryCard(summary: summary),
+                child: SummaryCard(
+                  key: registry.summaryCardKey,
+                  summary: summary,
+                ),
               ),
-              const DueSoonSection(),
+              DueSoonSection(key: registry.dueSoonKey),
               const FilterChips(),
               const SizedBox(height: 4),
               Expanded(
@@ -100,10 +115,24 @@ class HomeScreen extends ConsumerWidget {
                         ? methodMap[expense.paymentMethodId]
                         : null;
                     return ExpenseListItem(
+                      key: index == 0 ? registry.firstExpenseKey : null,
                       expense: expense,
                       category: category,
                       paymentMethod: paymentMethod,
-                      onTap: () => context.go('/expense/${expense.id}'),
+                      onTap: () {
+                        if (demoState.isActive) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Detail view is read-only in demo mode',
+                              ),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                          return;
+                        }
+                        context.go('/expense/${expense.id}');
+                      },
                     );
                   },
                 ),
@@ -115,7 +144,19 @@ class HomeScreen extends ConsumerWidget {
         error: (error, _) => Center(child: Text('Error: $error')),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go('/expense/add'),
+        key: registry.fabKey,
+        onPressed: () {
+          if (demoState.isActive) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Adding expenses is disabled in demo mode'),
+                duration: Duration(seconds: 2),
+              ),
+            );
+            return;
+          }
+          context.go('/expense/add');
+        },
         tooltip: 'Add Expense',
         child: const Icon(Icons.add),
       ),
