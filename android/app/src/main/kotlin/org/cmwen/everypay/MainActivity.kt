@@ -2,6 +2,6 @@
 // This MUST match the applicationId in build.gradle.kts and namespace
 package org.cmwen.everypay
 
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 
-class MainActivity : FlutterActivity()
+class MainActivity : FlutterFragmentActivity()

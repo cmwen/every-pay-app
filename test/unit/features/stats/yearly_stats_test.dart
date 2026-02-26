@@ -28,11 +28,7 @@ void main() {
 
   group('YearlyStats.compute', () {
     test('returns zero for empty list', () {
-      final stats = YearlyStats.compute(
-        expenses: [],
-        year: 2026,
-        now: now,
-      );
+      final stats = YearlyStats.compute(expenses: [], year: 2026, now: now);
       expect(stats.totalActual, 0);
       expect(stats.totalProjected, 0);
       expect(stats.months.length, 12);

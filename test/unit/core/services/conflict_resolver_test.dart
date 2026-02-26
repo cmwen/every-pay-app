@@ -28,10 +28,7 @@ void main() {
     );
   }
 
-  Category makeCategory({
-    String id = 'c1',
-    DateTime? updatedAt,
-  }) {
+  Category makeCategory({String id = 'c1', DateTime? updatedAt}) {
     return Category(
       id: id,
       name: 'Test',

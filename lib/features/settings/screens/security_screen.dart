@@ -31,7 +31,7 @@ class SecurityScreen extends ConsumerWidget {
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
             ),
-    error: (_, _) => ListTile(
+            error: (_, _) => ListTile(
               leading: const Icon(Icons.fingerprint),
               title: const Text('Biometric Lock'),
               subtitle: const Text('Unavailable on this device'),
@@ -115,4 +115,3 @@ class _SectionHeader extends StatelessWidget {
     );
   }
 }
-

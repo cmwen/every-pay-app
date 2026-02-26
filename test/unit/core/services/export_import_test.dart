@@ -149,9 +149,7 @@ void main() {
     });
 
     test('CSV escapes commas in values', () async {
-      final expWithComma = testExpense.copyWith(
-        notes: 'Has, comma',
-      );
+      final expWithComma = testExpense.copyWith(notes: 'Has, comma');
       await categoryRepo.upsertCategory(testCategory);
       await expenseRepo.upsertExpense(expWithComma);
 
@@ -191,7 +189,7 @@ void main() {
             'created_at': '2026-06-15T00:00:00.000',
             'updated_at': '2026-06-15T00:00:00.000',
             'device_id': 'test-device',
-          }
+          },
         ],
         'categories': [
           {
@@ -203,7 +201,7 @@ void main() {
             'sort_order': 0,
             'created_at': '2026-06-15T00:00:00.000',
             'updated_at': '2026-06-15T00:00:00.000',
-          }
+          },
         ],
       });
 
@@ -256,7 +254,7 @@ void main() {
             'created_at': '2026-06-15T00:00:00.000',
             'updated_at': '2026-07-01T00:00:00.000',
             'device_id': 'test-device',
-          }
+          },
         ],
         'categories': [],
       });

@@ -13,6 +13,10 @@ class AppLockWrapper extends ConsumerStatefulWidget {
 class _AppLockWrapperState extends ConsumerState<AppLockWrapper>
     with WidgetsBindingObserver {
   bool _authenticating = false;
+  DateTime? _backgroundedAt;
+
+  /// Grace period: don't re-lock if app was backgrounded for less than this.
+  static const _gracePeriod = Duration(seconds: 5);
 
   @override
   void initState() {
@@ -32,10 +36,21 @@ class _AppLockWrapperState extends ConsumerState<AppLockWrapper>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.hidden) {
-      _lockIfEnabled();
+      _backgroundedAt = DateTime.now();
     } else if (state == AppLifecycleState.resumed) {
-      _authenticateIfLocked();
+      _onResumed();
     }
+  }
+
+  Future<void> _onResumed() async {
+    final bg = _backgroundedAt;
+    _backgroundedAt = null;
+    if (bg != null && DateTime.now().difference(bg) < _gracePeriod) {
+      // Quick app switch — skip re-lock
+      return;
+    }
+    await _lockIfEnabled();
+    _authenticateIfLocked();
   }
 
   Future<void> _lockIfEnabled() async {

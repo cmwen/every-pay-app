@@ -9,6 +9,7 @@ import 'package:everypay/features/settings/screens/security_screen.dart';
 import 'package:everypay/features/settings/screens/payment_methods_screen.dart';
 import 'package:everypay/features/settings/screens/payment_method_form_screen.dart';
 import 'package:everypay/features/sync/screens/devices_screen.dart';
+import 'package:everypay/features/sync/screens/pairing_screen.dart';
 import 'package:everypay/features/expense/screens/add_expense_screen.dart';
 import 'package:everypay/features/expense/screens/expense_detail_screen.dart';
 import 'package:everypay/features/expense/screens/edit_expense_screen.dart';
@@ -130,6 +131,13 @@ final router = GoRouter(
                   path: 'devices',
                   parentNavigatorKey: _rootNavigatorKey,
                   builder: (context, state) => const DevicesScreen(),
+                  routes: [
+                    GoRoute(
+                      path: 'pair',
+                      parentNavigatorKey: _rootNavigatorKey,
+                      builder: (context, state) => const PairingScreen(),
+                    ),
+                  ],
                 ),
               ],
             ),

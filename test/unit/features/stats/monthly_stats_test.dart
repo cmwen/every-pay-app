@@ -34,13 +34,9 @@ void main() {
     'cat-entertainment': (
       name: 'Entertainment',
       icon: 'play_circle',
-      colour: '#E53935'
+      colour: '#E53935',
     ),
-    'cat-software': (
-      name: 'Software',
-      icon: 'cloud',
-      colour: '#8E24AA'
-    ),
+    'cat-software': (name: 'Software', icon: 'cloud', colour: '#8E24AA'),
   };
 
   group('MonthlyStats.compute', () {
@@ -92,8 +88,7 @@ void main() {
       final stats = MonthlyStats.compute(
         expenses: [
           makeExpense(status: ExpenseStatus.active),
-          makeExpense(
-              id: 'e2', status: ExpenseStatus.paused, amount: 100),
+          makeExpense(id: 'e2', status: ExpenseStatus.paused, amount: 100),
         ],
         categoryMap: categoryMap,
         month: now,
@@ -111,8 +106,10 @@ void main() {
         categoryMap: categoryMap,
         month: now,
       );
-      final totalPct = stats.categoryBreakdown
-          .fold<double>(0, (sum, c) => sum + c.percentage);
+      final totalPct = stats.categoryBreakdown.fold<double>(
+        0,
+        (sum, c) => sum + c.percentage,
+      );
       expect(totalPct, closeTo(100, 0.01));
     });
 

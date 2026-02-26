@@ -68,10 +68,8 @@ void main() {
     test('groups payments by date', () {
       final stats = UpcomingStats.compute(
         expenses: [
-          makeExpense(
-              id: 'e1', startDate: DateTime(2026, 6, 1), amount: 10),
-          makeExpense(
-              id: 'e2', startDate: DateTime(2026, 6, 1), amount: 20),
+          makeExpense(id: 'e1', startDate: DateTime(2026, 6, 1), amount: 10),
+          makeExpense(id: 'e2', startDate: DateTime(2026, 6, 1), amount: 20),
         ],
         days: 30,
         relativeTo: DateTime(2026, 6, 15),

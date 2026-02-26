@@ -4,7 +4,9 @@ import 'package:everypay/core/services/biometric_service.dart';
 
 const _kBiometricEnabled = 'biometric_lock_enabled';
 
-final biometricServiceProvider = Provider<BiometricService>((_) => BiometricService());
+final biometricServiceProvider = Provider<BiometricService>(
+  (_) => BiometricService(),
+);
 
 final biometricEnabledProvider =
     AsyncNotifierProvider<BiometricEnabledNotifier, bool>(
