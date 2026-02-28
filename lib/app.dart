@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:everypay/core/theme/app_theme.dart';
 import 'package:everypay/features/demo/widgets/tour_overlay.dart';
 import 'package:everypay/shared/providers/theme_provider.dart';
+import 'package:everypay/shared/widgets/app_lock_wrapper.dart';
 import 'package:everypay/router.dart';
 
 class EveryPayApp extends ConsumerWidget {
@@ -19,13 +20,15 @@ class EveryPayApp extends ConsumerWidget {
       themeMode: themeMode,
       routerConfig: router,
       debugShowCheckedModeBanner: false,
-      builder: (context, child) => Stack(
-        children: [
-          child!,
-          // TourOverlay lives here so its canvas origin == screen origin,
-          // which matches renderBox.localToGlobal coordinates exactly.
-          const TourOverlay(),
-        ],
+      builder: (context, child) => AppLockWrapper(
+        child: Stack(
+          children: [
+            child!,
+            // TourOverlay lives here so its canvas origin == screen origin,
+            // which matches renderBox.localToGlobal coordinates exactly.
+            const TourOverlay(),
+          ],
+        ),
       ),
     );
   }
