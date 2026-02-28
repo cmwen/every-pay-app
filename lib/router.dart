@@ -5,7 +5,6 @@ import 'package:everypay/features/stats/screens/stats_screen.dart';
 import 'package:everypay/features/settings/screens/settings_screen.dart';
 import 'package:everypay/features/settings/screens/categories_screen.dart';
 import 'package:everypay/features/settings/screens/export_screen.dart';
-import 'package:everypay/features/settings/screens/security_screen.dart';
 import 'package:everypay/features/settings/screens/payment_methods_screen.dart';
 import 'package:everypay/features/settings/screens/payment_method_form_screen.dart';
 import 'package:everypay/features/sync/screens/devices_screen.dart';
@@ -121,11 +120,6 @@ final router = GoRouter(
                   path: 'export',
                   parentNavigatorKey: _rootNavigatorKey,
                   builder: (context, state) => const ExportScreen(),
-                ),
-                GoRoute(
-                  path: 'security',
-                  parentNavigatorKey: _rootNavigatorKey,
-                  builder: (context, state) => const SecurityScreen(),
                 ),
                 GoRoute(
                   path: 'devices',

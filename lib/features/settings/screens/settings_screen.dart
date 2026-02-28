@@ -100,16 +100,6 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () => context.go('/settings/export'),
           ),
 
-          // Security section
-          _SectionHeader(title: 'SECURITY'),
-          ListTile(
-            leading: const Icon(Icons.security),
-            title: const Text('Security'),
-            subtitle: const Text('App lock & encryption'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.go('/settings/security'),
-          ),
-
           // Sync section
           _SectionHeader(title: 'SYNC'),
           ListTile(
