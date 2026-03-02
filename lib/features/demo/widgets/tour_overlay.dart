@@ -18,7 +18,9 @@ class TourOverlay extends ConsumerWidget {
     final registry = TourTargetRegistry.instance;
     final steps = registry.steps;
     final stepIndex = demoState.tourStep;
-    if (stepIndex < 0 || stepIndex >= steps.length) return const SizedBox.shrink();
+    if (stepIndex < 0 || stepIndex >= steps.length) {
+      return const SizedBox.shrink();
+    }
 
     final step = steps[stepIndex];
 
@@ -98,8 +100,7 @@ class _TourOverlayContent extends StatelessWidget {
     const arrowGap = 12.0;
 
     // Center tooltip horizontally over spotlight, clamped to screen
-    double left =
-        spotlightRect.center.dx - tooltipMaxWidth / 2;
+    double left = spotlightRect.center.dx - tooltipMaxWidth / 2;
     if (left < tooltipMargin) left = tooltipMargin;
     if (left + tooltipMaxWidth > screenWidth - tooltipMargin) {
       left = screenWidth - tooltipMargin - tooltipMaxWidth;
@@ -133,15 +134,15 @@ class _TourOverlayContent extends StatelessWidget {
                   child: Text(
                     step.title,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 Text(
                   '${stepIndex + 1} of $totalSteps',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
@@ -154,10 +155,7 @@ class _TourOverlayContent extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                TextButton(
-                  onPressed: onSkip,
-                  child: const Text('Skip'),
-                ),
+                TextButton(onPressed: onSkip, child: const Text('Skip')),
                 const SizedBox(width: 8),
                 FilledButton(
                   onPressed: onNext,
@@ -171,11 +169,7 @@ class _TourOverlayContent extends StatelessWidget {
     );
 
     if (step.direction == TooltipDirection.below) {
-      return Positioned(
-        left: left,
-        top: top,
-        child: tooltip,
-      );
+      return Positioned(left: left, top: top, child: tooltip);
     } else {
       // Position above: use a Transform to bottom-align
       return Positioned(

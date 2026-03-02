@@ -30,40 +30,40 @@ class TourTargetRegistry {
   final statsNavKey = GlobalKey(debugLabel: 'tour-stats-nav');
 
   List<TourStep> get steps => [
-        TourStep(
-          title: 'Monthly Spending',
-          description:
-              'Your total monthly cost at a glance, with a trend vs. last month.',
-          targetKey: summaryCardKey,
-          direction: TooltipDirection.below,
-        ),
-        TourStep(
-          title: 'Due Soon',
-          description:
-              'Upcoming payments in the next 7 days. Tap "See all" for the full calendar.',
-          targetKey: dueSoonKey,
-          direction: TooltipDirection.below,
-        ),
-        TourStep(
-          title: 'Your Subscriptions',
-          description:
-              'Each row shows name, category, cycle, and cost. Tap for details.',
-          targetKey: firstExpenseKey,
-          direction: TooltipDirection.below,
-        ),
-        TourStep(
-          title: 'Add Expense',
-          description:
-              'Tap here to add a new subscription. Pick from popular services or enter manually.',
-          targetKey: fabKey,
-          direction: TooltipDirection.above,
-        ),
-        TourStep(
-          title: 'Statistics & Insights',
-          description:
-              'Charts break down spending by category and month. Swipe between tabs.',
-          targetKey: statsNavKey,
-          direction: TooltipDirection.above,
-        ),
-      ];
+    TourStep(
+      title: 'Monthly Spending',
+      description:
+          'Your total monthly cost at a glance, with a trend vs. last month.',
+      targetKey: summaryCardKey,
+      direction: TooltipDirection.below,
+    ),
+    TourStep(
+      title: 'Due Soon',
+      description:
+          'Upcoming payments in the next 7 days. Tap "See all" for the full calendar.',
+      targetKey: dueSoonKey,
+      direction: TooltipDirection.below,
+    ),
+    TourStep(
+      title: 'Your Subscriptions',
+      description:
+          'Each row shows name, category, cycle, and cost. Tap for details.',
+      targetKey: firstExpenseKey,
+      direction: TooltipDirection.below,
+    ),
+    TourStep(
+      title: 'Add Expense',
+      description:
+          'Tap here to add a new subscription. Pick from popular services or enter manually.',
+      targetKey: fabKey,
+      direction: TooltipDirection.above,
+    ),
+    TourStep(
+      title: 'Statistics & Insights',
+      description:
+          'Charts break down spending by category and month. Swipe between tabs.',
+      targetKey: statsNavKey,
+      direction: TooltipDirection.above,
+    ),
+  ];
 }

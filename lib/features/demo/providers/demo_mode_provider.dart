@@ -26,11 +26,7 @@ class DemoModeState {
 
   bool get isTourActive => isActive && tourStep >= 0 && !tourDismissed;
 
-  DemoModeState copyWith({
-    bool? isActive,
-    int? tourStep,
-    bool? tourDismissed,
-  }) {
+  DemoModeState copyWith({bool? isActive, int? tourStep, bool? tourDismissed}) {
     return DemoModeState(
       isActive: isActive ?? this.isActive,
       tourStep: tourStep ?? this.tourStep,
