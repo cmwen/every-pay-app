@@ -32,9 +32,9 @@ class DemoBanner extends ConsumerWidget {
                 child: Text(
                   "You're exploring demo data",
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: colorScheme.onTertiaryContainer,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    color: colorScheme.onTertiaryContainer,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
               TextButton(

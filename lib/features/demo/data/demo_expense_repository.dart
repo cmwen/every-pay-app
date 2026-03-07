@@ -29,8 +29,9 @@ class DemoExpenseRepository implements ExpenseRepository {
           .toList();
     }
     if (paymentMethodId != null) {
-      result =
-          result.where((e) => e.paymentMethodId == paymentMethodId).toList();
+      result = result
+          .where((e) => e.paymentMethodId == paymentMethodId)
+          .toList();
     }
     return Stream.value(result);
   }
